@@ -1,10 +1,17 @@
 services:
   mysql:
-    image: 'mysql:latest'
+    image: mysql:latest
+    restart: always
     environment:
-      - 'MYSQL_DATABASE=mydatabase'
-      - 'MYSQL_PASSWORD=secret'
-      - 'MYSQL_ROOT_PASSWORD=verysecret'
-      - 'MYSQL_USER=myuser'
+      MYSQL_DATABASE: cloud_file_storage_db
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_PASSWORD: user_password
+      MYSQL_USER: my_user
     ports:
-      - '3306'
+      - '3306:3306'
+    volumes:
+      - mysql_cloud_file_storage_db_data:/var/lib/mysql
+
+
+volumes:
+  mysql_cloud_file_storage_db_data:
