@@ -1,6 +1,5 @@
 package com.ilyadudnikov.cloudfilestorage.services;
 
-import com.ilyadudnikov.cloudfilestorage.models.User;
 import com.ilyadudnikov.cloudfilestorage.repositories.UserRepository;
 import com.ilyadudnikov.cloudfilestorage.security.CustomUserDetails;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,10 +18,8 @@ public class CustomUserDetailService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findByUsername(username)
+        return userRepository.findByUsername(username)
+                .map(CustomUserDetails::new)
                 .orElseThrow(() -> new UsernameNotFoundException("User with the username <" + username + "> not found"));
-
-        return new CustomUserDetails(user);
-
     }
 }
