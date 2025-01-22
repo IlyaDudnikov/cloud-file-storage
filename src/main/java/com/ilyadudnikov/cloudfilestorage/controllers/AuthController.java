@@ -9,11 +9,9 @@ import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequestMapping("/auth")
@@ -26,16 +24,20 @@ public class AuthController {
     }
 
     @GetMapping("/login")
-    public String login() {
+    public String loginPage(@RequestParam(value = "error", required = false) String error, Model model) {
         if (userIsAuthenticated()) {
             return "redirect:/";
+        }
+
+        if (error != null) {
+            model.addAttribute("authError", "Invalid username ot password");
         }
 
         return "auth/login";
     }
 
     @GetMapping("/signup")
-    public String signup(@ModelAttribute("user") UserRegistrationDto userRegistrationDto) {
+    public String signupPage(@ModelAttribute("user") UserRegistrationDto userRegistrationDto) {
         if (userIsAuthenticated()) {
             return "redirect:/";
         }
