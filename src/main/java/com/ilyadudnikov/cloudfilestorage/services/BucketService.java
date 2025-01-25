@@ -1,8 +1,6 @@
 package com.ilyadudnikov.cloudfilestorage.services;
 
-import io.minio.BucketExistsArgs;
-import io.minio.MakeBucketArgs;
-import io.minio.MinioClient;
+import com.ilyadudnikov.cloudfilestorage.repositories.MinioRepository;
 import io.minio.errors.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,21 +13,13 @@ import java.security.NoSuchAlgorithmException;
 @RequiredArgsConstructor
 public class BucketService {
 
-    private final MinioClient minioClient;
+    private final MinioRepository minioRepository;
 
-    public boolean isBucketExist(String bucketName) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
-        return minioClient.bucketExists(
-                BucketExistsArgs.builder()
-                        .bucket(bucketName)
-                        .build()
-        );
+    public boolean isBucketExist() throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+        return minioRepository.isBucketExists();
     }
 
-    public void createBucket(String bucketName) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
-        minioClient.makeBucket(
-                MakeBucketArgs.builder()
-                        .bucket(bucketName)
-                        .build()
-        );
+    public void createBucket() throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+        minioRepository.createBucket();
     }
 }
