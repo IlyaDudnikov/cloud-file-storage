@@ -6,6 +6,7 @@ import io.minio.MakeBucketArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import io.minio.errors.*;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
@@ -23,7 +24,12 @@ public class MinioRepository {
     private final MinioClient minioClient;
     private final MinioProperties minioProperties;
 
-    private final String bucketName = minioProperties.getBucketName();
+    private String bucketName;
+
+    @PostConstruct
+    private void init() {
+        bucketName = minioProperties.getBucketName();
+    }
 
     public boolean isBucketExists() throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
         return minioClient.bucketExists(
