@@ -7,7 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Getter
 @Setter
 public class UploadFileDto {
-    private MultipartFile multipartFile;
+    private MultipartFile file;
     private String path;
     private Long ownerId;
 }

@@ -18,7 +18,7 @@ public class FileService {
     private final MinioRepository minioRepository;
 
     public void uploadFile(UploadFileDto uploadFileDto) {
-        MultipartFile file = uploadFileDto.getMultipartFile();
+        MultipartFile file = uploadFileDto.getFile();
         try (InputStream inputStream = file.getInputStream()) {
             String fullFileName = "user-" + uploadFileDto.getOwnerId() + "-files/"
                     + uploadFileDto.getPath()
