@@ -30,7 +30,7 @@ public class AuthController {
         }
 
         if (error != null) {
-            model.addAttribute("authError", "Invalid username ot password");
+            model.addAttribute("authError", "Invalid username or password");
         }
 
         return "auth/login";
