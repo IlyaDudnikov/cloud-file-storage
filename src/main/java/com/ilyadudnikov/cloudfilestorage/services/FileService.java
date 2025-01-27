@@ -1,7 +1,9 @@
 package com.ilyadudnikov.cloudfilestorage.services;
 
 import com.ilyadudnikov.cloudfilestorage.dto.MinioObjectDto;
+import com.ilyadudnikov.cloudfilestorage.dto.file.DeleteFileDto;
 import com.ilyadudnikov.cloudfilestorage.dto.file.UploadFileDto;
+import com.ilyadudnikov.cloudfilestorage.exeptions.FileNotDeletedException;
 import com.ilyadudnikov.cloudfilestorage.exeptions.FileOperationException;
 import com.ilyadudnikov.cloudfilestorage.exeptions.FileWasNotUploadedException;
 import com.ilyadudnikov.cloudfilestorage.repositories.MinioRepository;
@@ -60,6 +62,23 @@ public class FileService {
 
         return minioObjects;
     }
+
+    public void deleteFile(DeleteFileDto deleteFileDto) {
+        String fullFileName = getFullFileName(deleteFileDto.getOwnerId(), deleteFileDto.getPath(), deleteFileDto.getFileName());
+
+        try {
+            minioRepository.deleteObject(fullFileName);
+            log.info("File deleted successfully");
+        } catch (Exception e) {
+            log.error("File was not deleted: {}", deleteFileDto.getFileName(), e);
+            throw new FileNotDeletedException(e.getMessage());
+        }
+    }
+
+//    public void renameFile(String oldName, String newName, long ownerId, String path) {
+//        String fullFileName = getFullFileName(ownerId, oldName, path);
+//
+//    }
 
     String getFolderPath(long ownerId, String path) {
         return "user-" + ownerId + "-files/" + path;

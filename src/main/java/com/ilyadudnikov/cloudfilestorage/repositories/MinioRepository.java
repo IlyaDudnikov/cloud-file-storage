@@ -64,4 +64,13 @@ public class MinioRepository {
                         .build()
         );
     }
+
+    public void deleteObject(String objectFullName) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+        minioClient.removeObject(
+                RemoveObjectArgs.builder()
+                        .bucket(bucketName)
+                        .object(objectFullName)
+                        .build()
+        );
+    }
 }
