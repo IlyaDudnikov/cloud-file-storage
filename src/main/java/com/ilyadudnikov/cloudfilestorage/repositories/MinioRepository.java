@@ -1,11 +1,9 @@
 package com.ilyadudnikov.cloudfilestorage.repositories;
 
 import com.ilyadudnikov.cloudfilestorage.config.minio.MinioProperties;
-import io.minio.BucketExistsArgs;
-import io.minio.MakeBucketArgs;
-import io.minio.MinioClient;
-import io.minio.PutObjectArgs;
+import io.minio.*;
 import io.minio.errors.*;
+import io.minio.messages.Item;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -53,6 +51,16 @@ public class MinioRepository {
                         .bucket(bucketName)
                         .object(fileFullName)
                         .stream(inputStream, objectSize, -1)
+                        .build()
+        );
+    }
+
+    public Iterable<Result<Item>> getFiles(String path, boolean recursive) {
+        return minioClient.listObjects(
+                ListObjectsArgs.builder()
+                        .bucket(bucketName)
+                        .recursive(recursive)
+                        .prefix(path)
                         .build()
         );
     }

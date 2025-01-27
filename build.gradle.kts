@@ -33,6 +33,7 @@ dependencies {
     implementation("org.thymeleaf.extras:thymeleaf-extras-springsecurity6")
     implementation("org.springframework.session:spring-session-core")
     implementation("org.liquibase:liquibase-core")
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
     testImplementation("org.testcontainers:junit-jupiter")
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
     testImplementation("org.testcontainers:mysql")
