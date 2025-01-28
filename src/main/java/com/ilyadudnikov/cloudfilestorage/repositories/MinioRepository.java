@@ -87,4 +87,13 @@ public class MinioRepository {
                         .build()
         );
     }
+
+    public InputStream getObjectInputStream(String fullObjectName) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+        return minioClient.getObject(
+                GetObjectArgs.builder()
+                        .bucket(bucketName)
+                        .object(fullObjectName)
+                        .build()
+        );
+    }
 }

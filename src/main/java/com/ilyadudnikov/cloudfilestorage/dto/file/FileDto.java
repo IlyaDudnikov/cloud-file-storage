@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class DeleteFileDto {
+public class FileDto {
     private String fileName;
     private String path;
     private Long ownerId;
