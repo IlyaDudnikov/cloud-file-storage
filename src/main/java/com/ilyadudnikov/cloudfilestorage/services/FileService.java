@@ -2,7 +2,9 @@ package com.ilyadudnikov.cloudfilestorage.services;
 
 import com.ilyadudnikov.cloudfilestorage.dto.MinioObjectDto;
 import com.ilyadudnikov.cloudfilestorage.dto.file.DeleteFileDto;
+import com.ilyadudnikov.cloudfilestorage.dto.file.RenameFileDto;
 import com.ilyadudnikov.cloudfilestorage.dto.file.UploadFileDto;
+import com.ilyadudnikov.cloudfilestorage.exeptions.FileNotCopiedException;
 import com.ilyadudnikov.cloudfilestorage.exeptions.FileNotDeletedException;
 import com.ilyadudnikov.cloudfilestorage.exeptions.FileOperationException;
 import com.ilyadudnikov.cloudfilestorage.exeptions.FileWasNotUploadedException;
@@ -67,7 +69,7 @@ public class FileService {
         String fullFileName = getFullFileName(deleteFileDto.getOwnerId(), deleteFileDto.getPath(), deleteFileDto.getFileName());
 
         try {
-            minioRepository.deleteObject(fullFileName);
+            minioRepository.deleteFile(fullFileName);
             log.info("File deleted successfully");
         } catch (Exception e) {
             log.error("File was not deleted: {}", deleteFileDto.getFileName(), e);
@@ -75,10 +77,30 @@ public class FileService {
         }
     }
 
-//    public void renameFile(String oldName, String newName, long ownerId, String path) {
-//        String fullFileName = getFullFileName(ownerId, oldName, path);
-//
-//    }
+    public void renameFile(RenameFileDto renameFileDto) {
+        String oldFullFileName = getFullFileName(renameFileDto.getOwnerId(),
+                renameFileDto.getPath(),
+                renameFileDto.getOldFileName());
+        String newFullFileName = getFullFileName(renameFileDto.getOwnerId(),
+                renameFileDto.getPath(),
+                renameFileDto.getNewFileName());
+
+        try {
+            minioRepository.copyFile(oldFullFileName, newFullFileName);
+        } catch (Exception e) {
+            log.error("File was not copied for rename: {}", oldFullFileName, e);
+            throw new FileNotCopiedException(e.getMessage());
+        }
+
+        try {
+            minioRepository.deleteFile(oldFullFileName);
+        } catch (Exception e) {
+            log.error("Copied file was not deleted for rename: {}", oldFullFileName, e);
+            throw new FileNotDeletedException(e.getMessage());
+        }
+
+        log.info("File renamed successfully");
+    }
 
     String getFolderPath(long ownerId, String path) {
         return "user-" + ownerId + "-files/" + path;

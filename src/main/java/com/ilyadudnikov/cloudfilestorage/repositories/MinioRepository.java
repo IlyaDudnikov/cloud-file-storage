@@ -73,4 +73,18 @@ public class MinioRepository {
                         .build()
         );
     }
+
+    public void copyFile(String oldFullFileName, String newFullFileName) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+        minioClient.copyObject(
+                CopyObjectArgs.builder()
+                        .bucket(bucketName)
+                        .object(newFullFileName)
+                        .source(
+                                CopySource.builder()
+                                        .bucket(bucketName)
+                                        .object(oldFullFileName)
+                                        .build())
+                        .build()
+        );
+    }
 }
