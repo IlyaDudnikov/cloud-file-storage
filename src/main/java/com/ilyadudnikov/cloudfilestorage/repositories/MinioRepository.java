@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
 
 @Slf4j
 @Repository
@@ -95,5 +96,10 @@ public class MinioRepository {
                         .object(fullFileName)
                         .build()
         );
+    }
+
+    public void uploadFolder(List<SnowballObject> objects) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+        minioClient.uploadSnowballObjects(
+                UploadSnowballObjectsArgs.builder().bucket(bucketName).objects(objects).build());
     }
 }
