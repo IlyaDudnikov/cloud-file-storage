@@ -106,12 +106,7 @@ public class FileService {
                 renameFileDto.getPath(),
                 renameFileDto.getNewFileName());
 
-        try {
-            minioRepository.copyFile(oldFullFileName, newFullFileName);
-        } catch (Exception e) {
-            log.error("File was not copied for rename: {}", oldFullFileName, e);
-            throw new FileNotCopiedException(e.getMessage());
-        }
+        copyFileOrThrow(oldFullFileName, newFullFileName);
 
         try {
             minioRepository.deleteFile(oldFullFileName);
@@ -121,6 +116,15 @@ public class FileService {
         }
 
         log.info("File renamed successfully");
+    }
+
+    public void copyFileOrThrow(String oldFullFileName, String newFullFileName) {
+        try {
+            minioRepository.copyFile(oldFullFileName, newFullFileName);
+        } catch (Exception e) {
+            log.error("File was not copied for rename: {}", oldFullFileName, e);
+            throw new FileNotCopiedException(e.getMessage());
+        }
     }
 
     public ByteArrayResource downloadFile(FileDto fileDto) {

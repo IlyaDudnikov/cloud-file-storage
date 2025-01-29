@@ -2,6 +2,7 @@ package com.ilyadudnikov.cloudfilestorage.services;
 
 import com.ilyadudnikov.cloudfilestorage.dto.MinioObjectDto;
 import com.ilyadudnikov.cloudfilestorage.dto.folder.FolderDto;
+import com.ilyadudnikov.cloudfilestorage.dto.folder.RenameFolderDto;
 import com.ilyadudnikov.cloudfilestorage.dto.folder.UploadFolderDto;
 import com.ilyadudnikov.cloudfilestorage.exeptions.FolderNotDeletedException;
 import com.ilyadudnikov.cloudfilestorage.exeptions.FolderNotDownloadedException;
@@ -90,8 +91,35 @@ public class FolderService {
         String folderPath = getFolderPath(folderDto);
         List<MinioObjectDto> userFilesInFolder = fileService.getAllUserFilesInFolder(folderDto.getOwnerId(), folderPath);
 
-        List<DeleteObject> deleteFiles = convertToDeleteObjects(userFilesInFolder, folderDto.getOwnerId());
+        deleteFiles(userFilesInFolder, folderDto);
+    }
 
+    public void renameFolder(RenameFolderDto renameFolderDto) {
+        FolderDto folderDto = new FolderDto(renameFolderDto.getOldFolderName(),
+                renameFolderDto.getPath(), renameFolderDto.getOwnerId());
+        String folderPath = getFolderPath(folderDto);
+        List<MinioObjectDto> userFilesInFolder = fileService.getAllUserFilesInFolder(folderDto.getOwnerId(), folderPath);
+
+        for (MinioObjectDto file : userFilesInFolder) {
+            String oldFullFileName = fileService.getFullFileName(renameFolderDto.getOwnerId(),
+                    file.getPath(), file.getName());
+
+            String newFolderPath = getFolderPath(renameFolderDto.getPath(), renameFolderDto.getNewFolderName());
+            String newFilePath = file.getPath().replaceFirst(folderPath, newFolderPath);
+
+            String newFullFileName = fileService.getFullFileName(renameFolderDto.getOwnerId(),
+                    newFilePath, file.getName());
+
+            fileService.copyFileOrThrow(oldFullFileName, newFullFileName);
+        }
+
+        deleteFiles(userFilesInFolder, folderDto);
+
+        log.info("Folder successfully renamed");
+    }
+
+    private void deleteFiles(List<MinioObjectDto> files, FolderDto folderDto) {
+        List<DeleteObject> deleteFiles = convertToDeleteObjects(files, folderDto.getOwnerId());
         try {
             Iterable<Result<DeleteError>> results = minioRepository.deleteFiles(deleteFiles);
 
@@ -100,7 +128,7 @@ public class FolderService {
                 log.error("Error in deleting object {}; {}", error.objectName(), error.message());
             }
         } catch (Exception e) {
-            log.error("Error while deleting folder: {}", folderPath, e);
+            log.error("Error while deleting folder: {}", getFolderPath(folderDto), e);
             throw new FolderNotDeletedException(e.getMessage());
         }
     }
@@ -108,6 +136,11 @@ public class FolderService {
     private String getFolderPath(FolderDto folderDto) {
         return folderDto.getPath() +
                 folderDto.getFolderName() + "/";
+    }
+
+    private String getFolderPath(String path, String folderName) {
+        return path +
+                folderName + "/";
     }
 
     private List<DeleteObject> convertToDeleteObjects(List<MinioObjectDto> minioObjects, long ownerId) {
