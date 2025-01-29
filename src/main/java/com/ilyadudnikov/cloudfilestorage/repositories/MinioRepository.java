@@ -3,6 +3,8 @@ package com.ilyadudnikov.cloudfilestorage.repositories;
 import com.ilyadudnikov.cloudfilestorage.config.minio.MinioProperties;
 import io.minio.*;
 import io.minio.errors.*;
+import io.minio.messages.DeleteError;
+import io.minio.messages.DeleteObject;
 import io.minio.messages.Item;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -100,6 +102,19 @@ public class MinioRepository {
 
     public void uploadFolder(List<SnowballObject> objects) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
         minioClient.uploadSnowballObjects(
-                UploadSnowballObjectsArgs.builder().bucket(bucketName).objects(objects).build());
+                UploadSnowballObjectsArgs.builder()
+                        .bucket(bucketName)
+                        .objects(objects)
+                        .build()
+        );
+    }
+
+    public Iterable<Result<DeleteError>> deleteFiles(List<DeleteObject> objects) {
+        return minioClient.removeObjects(
+                        RemoveObjectsArgs.builder()
+                                .bucket(bucketName)
+                                .objects(objects)
+                                .build()
+        );
     }
 }

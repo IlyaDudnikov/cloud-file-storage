@@ -3,10 +3,14 @@ package com.ilyadudnikov.cloudfilestorage.services;
 import com.ilyadudnikov.cloudfilestorage.dto.MinioObjectDto;
 import com.ilyadudnikov.cloudfilestorage.dto.folder.FolderDto;
 import com.ilyadudnikov.cloudfilestorage.dto.folder.UploadFolderDto;
+import com.ilyadudnikov.cloudfilestorage.exeptions.FolderNotDeletedException;
 import com.ilyadudnikov.cloudfilestorage.exeptions.FolderNotDownloadedException;
 import com.ilyadudnikov.cloudfilestorage.exeptions.FolderNotUploadedException;
 import com.ilyadudnikov.cloudfilestorage.repositories.MinioRepository;
+import io.minio.Result;
 import io.minio.SnowballObject;
+import io.minio.messages.DeleteError;
+import io.minio.messages.DeleteObject;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -15,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -80,9 +85,38 @@ public class FolderService {
             throw new FolderNotDownloadedException(e.getMessage());
         }
     }
+
+    public void deleteFolder(FolderDto folderDto) {
+        String folderPath = getFolderPath(folderDto);
+        List<MinioObjectDto> userFilesInFolder = fileService.getAllUserFilesInFolder(folderDto.getOwnerId(), folderPath);
+
+        List<DeleteObject> deleteFiles = convertToDeleteObjects(userFilesInFolder, folderDto.getOwnerId());
+
+        try {
+            Iterable<Result<DeleteError>> results = minioRepository.deleteFiles(deleteFiles);
+
+            for (Result<DeleteError> result : results) {
+                DeleteError error = result.get();
+                log.error("Error in deleting object {}; {}", error.objectName(), error.message());
+            }
+        } catch (Exception e) {
+            log.error("Error while deleting folder: {}", folderPath, e);
+            throw new FolderNotDeletedException(e.getMessage());
+        }
+    }
     
     private String getFolderPath(FolderDto folderDto) {
         return folderDto.getPath() +
                 folderDto.getFolderName() + "/";
+    }
+
+    private List<DeleteObject> convertToDeleteObjects(List<MinioObjectDto> minioObjects, long ownerId) {
+        List<DeleteObject> deleteObjects = new LinkedList<>();
+        for (MinioObjectDto file : minioObjects) {
+            String fullFileName = fileService.getFullFileName(ownerId, file.getPath(), file.getName());
+            deleteObjects.add(new DeleteObject(fullFileName));
+        }
+
+        return deleteObjects;
     }
 }
