@@ -41,9 +41,9 @@ public class FileService {
         }
     }
 
-    public List<MinioObjectDto> getUserFilesInFolder(long ownerId, String path, boolean recursive) {
+    public List<MinioObjectDto> getUserFilesInFolder(long ownerId, String path) {
         String folderPath = getFolderPath(ownerId, path);
-        Iterable<Result<Item>> results = minioRepository.getFiles(folderPath, recursive);
+        Iterable<Result<Item>> results = minioRepository.getFiles(folderPath, false);
 
         List<MinioObjectDto> minioObjects = new ArrayList<>();
         results.forEach(result -> {
@@ -54,6 +54,29 @@ public class FileService {
 
                 minioObjects.add(
                         new MinioObjectDto(fileName, item.isDir(), path)
+                );
+            } catch (Exception e) {
+                throw new FileOperationException(e.getMessage());
+            }
+        });
+
+        return minioObjects;
+    }
+
+    public List<MinioObjectDto> getAllUserFilesInFolder(long ownerId, String path) {
+        String folderPath = getFolderPath(ownerId, path);
+        Iterable<Result<Item>> results = minioRepository.getFiles(folderPath, true);
+
+        List<MinioObjectDto> minioObjects = new ArrayList<>();
+        results.forEach(result -> {
+            try {
+                Item item = result.get();
+                String fullObjectName = item.objectName();
+                String filePath = getFilePathFromFullName(fullObjectName, ownerId);
+                String fileName = getObjectNameFromFullName(fullObjectName);
+
+                minioObjects.add(
+                        new MinioObjectDto(fileName, item.isDir(), filePath)
                 );
             } catch (Exception e) {
                 throw new FileOperationException(e.getMessage());
@@ -102,7 +125,7 @@ public class FileService {
 
     public ByteArrayResource downloadFile(FileDto fileDto) {
         String fullFileName = getFullFileName(fileDto.getOwnerId(), fileDto.getPath(), fileDto.getFileName());
-        try (InputStream inputStream = minioRepository.getObjectInputStream(fullFileName)) {
+        try (InputStream inputStream = minioRepository.getFileInputStream(fullFileName)) {
             ByteArrayResource byteArrayResource = new ByteArrayResource(inputStream.readAllBytes());
             log.info("File downloaded successfully");
             return byteArrayResource;
@@ -112,20 +135,26 @@ public class FileService {
         }
     }
 
-    String getFolderPath(long ownerId, String path) {
+    private String getFolderPath(long ownerId, String path) {
         return "user-" + ownerId + "-files/" + path;
     }
 
-    String getFullFileName(long ownerId, String path, String filename) {
+    public String getFullFileName(long ownerId, String path, String filename) {
         return getFolderPath(ownerId, path) + filename;
     }
 
-    String getObjectNameFromFullName(String fullName) {
+    private String getObjectNameFromFullName(String fullName) {
         if (fullName.endsWith("/")) {
             fullName = fullName.substring(0, fullName.length() - 1);
         }
 
         return fullName.substring(fullName.lastIndexOf("/") + 1);
+    }
+
+    private String getFilePathFromFullName(String fullName, long ownerId) {
+        String ownerPrefix = "user-" + ownerId + "-files/";
+        String fullPath = fullName.substring(0, fullName.lastIndexOf("/") + 1);
+        return fullPath.replaceFirst(ownerPrefix, "");
     }
 
 }
