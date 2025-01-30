@@ -159,13 +159,18 @@ public class FolderService {
                 getFolderPath(folderDto);
     }
 
-    private List<DeleteObject> convertToDeleteObjects(List<MinioObjectDto> minioObjects, long ownerId) {
-        List<DeleteObject> deleteObjects = new LinkedList<>();
-        for (MinioObjectDto file : minioObjects) {
-            String fullFileName = fileService.getFullFileName(ownerId, file.getPath(), file.getName());
-            deleteObjects.add(new DeleteObject(fullFileName));
-        }
+    private String getFullFolderPath(String path, String folderName, long ownerId) {
+        return "user-" + ownerId + "-files/" +
+                getFolderPath(path, folderName);
+    }
 
-        return deleteObjects;
+    private List<DeleteObject> convertToDeleteObjects(List<MinioObjectDto> minioObjects, long ownerId) {
+        return minioObjects.stream()
+                .map(object -> new DeleteObject(
+                        object.getIsDir()
+                                ? getFullFolderPath(object.getPath(), object.getName(), ownerId)
+                                : fileService.getFullFileName(ownerId, object.getPath(), object.getName())
+                ))
+                .toList();
     }
 }

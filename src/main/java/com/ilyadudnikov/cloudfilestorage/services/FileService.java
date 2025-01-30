@@ -67,23 +67,7 @@ public class FileService {
         String folderPath = getFolderPath(ownerId, path);
         Iterable<Result<Item>> results = minioRepository.getFiles(folderPath, true);
 
-        List<MinioObjectDto> minioObjects = new ArrayList<>();
-        results.forEach(result -> {
-            try {
-                Item item = result.get();
-                String fullObjectName = item.objectName();
-                String filePath = getFilePathFromFullName(fullObjectName, ownerId);
-                String fileName = getObjectNameFromFullName(fullObjectName);
-
-                minioObjects.add(
-                        new MinioObjectDto(fileName, item.isDir(), filePath)
-                );
-            } catch (Exception e) {
-                throw new FileOperationException(e.getMessage());
-            }
-        });
-
-        return minioObjects;
+        return convertToMinioObjects(results, ownerId);
     }
 
     public void deleteFile(FileDto fileDto) {
@@ -139,6 +123,27 @@ public class FileService {
         }
     }
 
+    private List<MinioObjectDto> convertToMinioObjects(Iterable<Result<Item>> results, long ownerId) {
+        List<MinioObjectDto> minioObjects = new ArrayList<>();
+        results.forEach(result -> {
+            try {
+                Item item = result.get();
+                String fullObjectName = item.objectName();
+                String objectPath = getObjectPathFromFullName(fullObjectName, ownerId);
+                String objectName = getObjectNameFromFullName(fullObjectName);
+                boolean isDir = fullObjectName.endsWith("/");
+
+                minioObjects.add(
+                        new MinioObjectDto(objectName, isDir, objectPath)
+                );
+            } catch (Exception e) {
+                throw new FileOperationException(e.getMessage());
+            }
+        });
+
+        return minioObjects;
+    }
+
     private String getFolderPath(long ownerId, String path) {
         return "user-" + ownerId + "-files/" + path;
     }
@@ -155,10 +160,13 @@ public class FileService {
         return fullName.substring(fullName.lastIndexOf("/") + 1);
     }
 
-    private String getFilePathFromFullName(String fullName, long ownerId) {
+    private String getObjectPathFromFullName(String fullName, long ownerId) {
+        if (fullName.endsWith("/")) {
+            fullName = fullName.substring(0, fullName.length() - 1);
+        }
         String ownerPrefix = "user-" + ownerId + "-files/";
-        String fullPath = fullName.substring(0, fullName.lastIndexOf("/") + 1);
-        return fullPath.replaceFirst(ownerPrefix, "");
+        String objectPath = fullName.substring(0, fullName.lastIndexOf("/") + 1);
+        return objectPath.replaceFirst(ownerPrefix, "");
     }
 
 }
