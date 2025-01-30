@@ -66,11 +66,22 @@ public class FolderService {
         List<MinioObjectDto> allUserFilesInFolder = fileService.getAllUserFilesInFolder(folderDto.getOwnerId(), fullPath);
 
         try (ZipOutputStream zipOutputStream = new ZipOutputStream(outputStream)) {
-            for (MinioObjectDto file : allUserFilesInFolder) {
-                String fullFileName = fileService.getFullFileName(
-                        folderDto.getOwnerId(), file.getPath(), file.getName());
-                InputStream fileInputStream = minioRepository.getFileInputStream(fullFileName);
-                zipOutputStream.putNextEntry(new ZipEntry(file.getPath() + file.getName()));
+            for (MinioObjectDto object : allUserFilesInFolder) {
+                String fullObjectName;
+                if (object.getIsDir()) {
+                    fullObjectName = getFullFolderPath(
+                            object.getPath(), object.getName(), folderDto.getOwnerId());
+                } else {
+                    fullObjectName = fileService.getFullFileName(
+                            folderDto.getOwnerId(), object.getPath(), object.getName());
+                }
+                InputStream fileInputStream = minioRepository.getFileInputStream(fullObjectName);
+
+                String zipName = object.getIsDir()
+                        ? object.getPath() + object.getName() + "/"
+                        : object.getPath() + object.getName();
+                zipName = zipName.replaceFirst(folderDto.getPath(), "");
+                zipOutputStream.putNextEntry(new ZipEntry(zipName));
 
                 byte[] buffer = new byte[1024];
                 int bytesRead;
