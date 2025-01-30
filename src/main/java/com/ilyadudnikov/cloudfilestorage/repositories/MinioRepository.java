@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.InvalidKeyException;
@@ -116,5 +117,12 @@ public class MinioRepository {
                                 .objects(objects)
                                 .build()
         );
+    }
+
+    public void createFolder(String fullPath) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+        minioClient.putObject(
+                PutObjectArgs.builder().bucket(bucketName).object(fullPath).stream(
+                                new ByteArrayInputStream(new byte[] {}), 0, -1)
+                        .build());
     }
 }

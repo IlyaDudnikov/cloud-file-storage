@@ -4,6 +4,7 @@ import com.ilyadudnikov.cloudfilestorage.dto.MinioObjectDto;
 import com.ilyadudnikov.cloudfilestorage.dto.folder.FolderDto;
 import com.ilyadudnikov.cloudfilestorage.dto.folder.RenameFolderDto;
 import com.ilyadudnikov.cloudfilestorage.dto.folder.UploadFolderDto;
+import com.ilyadudnikov.cloudfilestorage.exeptions.FolderNotCreatedException;
 import com.ilyadudnikov.cloudfilestorage.exeptions.FolderNotDeletedException;
 import com.ilyadudnikov.cloudfilestorage.exeptions.FolderNotDownloadedException;
 import com.ilyadudnikov.cloudfilestorage.exeptions.FolderNotUploadedException;
@@ -132,6 +133,16 @@ public class FolderService {
             throw new FolderNotDeletedException(e.getMessage());
         }
     }
+
+    public void createFolder(FolderDto newFolderDto) {
+        String newFolderPath = getFullFolderPath(newFolderDto);
+        try {
+            minioRepository.createFolder(newFolderPath);
+        } catch (Exception e) {
+            log.error("Error while creating folder: {}", newFolderPath, e);
+            throw new FolderNotCreatedException(e.getMessage());
+        }
+    }
     
     private String getFolderPath(FolderDto folderDto) {
         return folderDto.getPath() +
@@ -141,6 +152,11 @@ public class FolderService {
     private String getFolderPath(String path, String folderName) {
         return path +
                 folderName + "/";
+    }
+
+    private String getFullFolderPath(FolderDto folderDto) {
+        return "user-" + folderDto.getOwnerId() + "-files/" +
+                getFolderPath(folderDto);
     }
 
     private List<DeleteObject> convertToDeleteObjects(List<MinioObjectDto> minioObjects, long ownerId) {
