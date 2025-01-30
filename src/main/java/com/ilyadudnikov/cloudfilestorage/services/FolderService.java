@@ -21,7 +21,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -101,17 +100,29 @@ public class FolderService {
         String folderPath = getFolderPath(folderDto);
         List<MinioObjectDto> userFilesInFolder = fileService.getAllUserFilesInFolder(folderDto.getOwnerId(), folderPath);
 
-        for (MinioObjectDto file : userFilesInFolder) {
-            String oldFullFileName = fileService.getFullFileName(renameFolderDto.getOwnerId(),
-                    file.getPath(), file.getName());
+        for (MinioObjectDto object : userFilesInFolder) {
+            String oldFullObjectName;
+            if (object.getIsDir()) {
+                oldFullObjectName = getFullFolderPath(
+                        object.getPath(), object.getName(), renameFolderDto.getOwnerId());
+            } else {
+                oldFullObjectName = fileService.getFullFileName(
+                        renameFolderDto.getOwnerId(), object.getPath(), object.getName());
+            }
 
             String newFolderPath = getFolderPath(renameFolderDto.getPath(), renameFolderDto.getNewFolderName());
-            String newFilePath = file.getPath().replaceFirst(folderPath, newFolderPath);
+            String newObjectPath = object.getPath().replaceFirst(folderPath, newFolderPath);
 
-            String newFullFileName = fileService.getFullFileName(renameFolderDto.getOwnerId(),
-                    newFilePath, file.getName());
+            String newFullObjectName;
+            if (object.getIsDir()) {
+                newFullObjectName = getFullFolderPath(
+                        newObjectPath, object.getName(), renameFolderDto.getOwnerId());
+            } else {
+                newFullObjectName = fileService.getFullFileName(
+                        renameFolderDto.getOwnerId(), newObjectPath, object.getName());
+            }
 
-            fileService.copyFileOrThrow(oldFullFileName, newFullFileName);
+            fileService.copyFileOrThrow(oldFullObjectName, newFullObjectName);
         }
 
         deleteFiles(userFilesInFolder, folderDto);
