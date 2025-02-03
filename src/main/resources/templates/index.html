@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <title>Cloud File Storage</title>
@@ -47,6 +47,20 @@
                         </form>
                     </div>
                 </div>
+
+                <!-- Breadcrumb -->
+                <nav th:if="${#lists.size(breadcrumbs) > 1}"
+                        style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='%236c757d'/%3E%3C/svg%3E&#34;);" aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li th:each="breadcrumb, iterStat : ${breadcrumbs}"
+                        th:class="${iterStat.last ? 'active ' : ''} + 'breadcrumb-item'">
+                        <a th:href="${breadcrumb.link}" th:text="${breadcrumb.text}" th:if="${!iterStat.last}"></a>
+                        <span th:text="${breadcrumb.text}" th:if="${iterStat.last}" aria-current="page"></span>
+                    </li>
+                </ol>
+                </nav>
+
+
 
                 <!-- Folder section -->
                 <div th:if="${files}">

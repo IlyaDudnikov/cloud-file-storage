@@ -1,10 +1,12 @@
 package com.ilyadudnikov.cloudfilestorage.controllers;
 
+import com.ilyadudnikov.cloudfilestorage.dto.BreadcrumbItem;
 import com.ilyadudnikov.cloudfilestorage.dto.MinioObjectDto;
 import com.ilyadudnikov.cloudfilestorage.dto.folder.FolderDto;
 import com.ilyadudnikov.cloudfilestorage.dto.folder.RenameFolderDto;
 import com.ilyadudnikov.cloudfilestorage.security.CustomUserDetails;
 import com.ilyadudnikov.cloudfilestorage.services.FileService;
+import com.ilyadudnikov.cloudfilestorage.utils.BreadcrumbUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -19,6 +21,7 @@ import java.util.List;
 public class MainController {
 
     private final FileService fileService;
+    private final BreadcrumbUtils breadcrumbUtils;
     
     @GetMapping("/")
     public String index(@AuthenticationPrincipal CustomUserDetails userDetails,
@@ -31,6 +34,10 @@ public class MainController {
         }
         model.addAttribute("folderDto", new FolderDto());
         model.addAttribute("renameFolderDto", new RenameFolderDto());
+
+        List<BreadcrumbItem> breadcrumbs = breadcrumbUtils.getBreadcrumbs(path);
+        model.addAttribute("breadcrumbs", breadcrumbs);
+
         return "index";
     }
 
