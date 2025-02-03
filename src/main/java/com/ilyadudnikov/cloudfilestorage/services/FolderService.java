@@ -121,8 +121,10 @@ public class FolderService {
                         renameFolderDto.getOwnerId(), object.getPath(), object.getName());
             }
 
+            // Экранирование специальных символов
+            String escapedFolderPath = folderPath.replace("(", "\\(").replace(")", "\\)").replace(" ", "\\ ");
             String newFolderPath = getFolderPath(renameFolderDto.getPath(), renameFolderDto.getNewFolderName());
-            String newObjectPath = object.getPath().replaceFirst(folderPath, newFolderPath);
+            String newObjectPath = object.getPath().replaceFirst(escapedFolderPath, newFolderPath);
 
             String newFullObjectName;
             if (object.getIsDir()) {
