@@ -2,6 +2,7 @@ package com.ilyadudnikov.cloudfilestorage.controllers;
 
 import com.ilyadudnikov.cloudfilestorage.dto.BreadcrumbItem;
 import com.ilyadudnikov.cloudfilestorage.dto.MinioObjectDto;
+import com.ilyadudnikov.cloudfilestorage.dto.file.FileDto;
 import com.ilyadudnikov.cloudfilestorage.dto.file.RenameFileDto;
 import com.ilyadudnikov.cloudfilestorage.dto.folder.FolderDto;
 import com.ilyadudnikov.cloudfilestorage.dto.folder.RenameFolderDto;
@@ -37,6 +38,7 @@ public class MainController {
         model.addAttribute("renameFolderDto", new RenameFolderDto());
 
         model.addAttribute("renameFileDto", new RenameFileDto());
+        model.addAttribute("fileDto", new FileDto());
 
         List<BreadcrumbItem> breadcrumbs = breadcrumbUtils.getBreadcrumbs(path);
         model.addAttribute("breadcrumbs", breadcrumbs);
