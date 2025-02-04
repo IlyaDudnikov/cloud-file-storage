@@ -178,6 +178,15 @@
                                                     <button type="submit" class="dropdown-item">Delete</button>
                                                 </form>
                                             </li>
+
+                                            <!-- File download -->
+                                            <li>
+                                                <form th:action="@{/files/download}" th:method="get" th:object="${fileDto}">
+                                                    <input type="hidden" th:name="path" th:value="${file.path}">
+                                                    <input type="hidden" th:name="fileName" th:value="${file.name}">
+                                                    <button type="submit" class="dropdown-item">Download</button>
+                                                </form>
+                                            </li>
                                         </ul>
                                     </div>
                                 </div>

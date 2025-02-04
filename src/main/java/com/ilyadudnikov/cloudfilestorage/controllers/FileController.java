@@ -5,6 +5,10 @@ import com.ilyadudnikov.cloudfilestorage.dto.file.RenameFileDto;
 import com.ilyadudnikov.cloudfilestorage.security.CustomUserDetails;
 import com.ilyadudnikov.cloudfilestorage.services.FileService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -25,23 +29,20 @@ public class FileController {
 //        return "redirect:/hello";
 //    }
 //
-//    @GetMapping(value = "/download", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-//    public ResponseEntity<ByteArrayResource> downloadFile() {
-//        FileDto fileDto = new FileDto();
-//        fileDto.setFileName("");
-//        fileDto.setPath("folder-1");
-//        fileDto.setOwnerId(3L);
-//
-//        try {
-//            ByteArrayResource byteArrayResource = fileService.downloadFile(fileDto);
-//
-//            return ResponseEntity.ok()
-//                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileDto.getFileName())
-//                    .body(byteArrayResource); // Передаем InputStream клиенту
-//        } catch (Exception e) {
-//            return ResponseEntity.internalServerError().build();
-//        }
-//    }
+    @GetMapping(value = "/download", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    public ResponseEntity<ByteArrayResource> downloadFile(@ModelAttribute("fileDto") FileDto fileDto,
+                                                          @AuthenticationPrincipal CustomUserDetails userDetails) {
+        try {
+            fileDto.setOwnerId(userDetails.getUser().getId());
+            ByteArrayResource byteArrayResource = fileService.downloadFile(fileDto);
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileDto.getFileName())
+                    .body(byteArrayResource); // Передаем InputStream клиенту
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
 
     @DeleteMapping
     public String deleteFile(@ModelAttribute("fileDto") FileDto fileDto,
