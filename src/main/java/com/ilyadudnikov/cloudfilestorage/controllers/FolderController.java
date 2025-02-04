@@ -23,10 +23,19 @@ public class FolderController {
     private final FolderService folderService;
 
     @PostMapping("/upload")
-    public String uploadFolder(@ModelAttribute("uploadFolder") UploadFolderDto uploadFolderDto) {
-        uploadFolderDto.setOwnerId(3L);
-        folderService.uploadFolder(uploadFolderDto);
-        return "index1";
+    public String uploadFolder(@ModelAttribute("uploadFolder") UploadFolderDto uploadFolderDto,
+                               @AuthenticationPrincipal CustomUserDetails userDetails,
+                               RedirectAttributes redirectAttributes) {
+        try {
+            uploadFolderDto.setOwnerId(userDetails.getUser().getId());
+            folderService.uploadFolder(uploadFolderDto);
+            redirectAttributes.addFlashAttribute("success", "Folder uploaded successfully");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Folder upload failed");
+        }
+
+        redirectAttributes.addAttribute("path", uploadFolderDto.getPath());
+        return "redirect:/";
     }
 
     @GetMapping(value = "/download", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
@@ -95,27 +104,4 @@ public class FolderController {
         redirectAttributes.addAttribute("path", renameFolderDto.getPath());
         return "redirect:/";
     }
-
-    @PostMapping("/rename")
-    public String renameFolder1() {
-        RenameFolderDto renameFolderDto = new RenameFolderDto();
-        renameFolderDto.setNewFolderName("folder-new");
-        renameFolderDto.setOldFolderName("2");
-        renameFolderDto.setOwnerId(3L);
-        renameFolderDto.setPath("folder-1/");
-        folderService.renameFolder(renameFolderDto);
-        return "index1";
-    }
-
-
-
-//    @PostMapping("/create")
-//    public String createFolder() {
-//        FolderDto newFolderDto = new FolderDto();
-//        newFolderDto.setFolderName("folder-new");
-//        newFolderDto.setPath("folder-1/2/");
-//        newFolderDto.setOwnerId(3L);
-//        folderService.createFolder(newFolderDto);
-//        return "index1";
-//    }
 }

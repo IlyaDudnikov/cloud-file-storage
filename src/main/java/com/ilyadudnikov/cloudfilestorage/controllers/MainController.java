@@ -7,6 +7,7 @@ import com.ilyadudnikov.cloudfilestorage.dto.file.RenameFileDto;
 import com.ilyadudnikov.cloudfilestorage.dto.file.UploadFileDto;
 import com.ilyadudnikov.cloudfilestorage.dto.folder.FolderDto;
 import com.ilyadudnikov.cloudfilestorage.dto.folder.RenameFolderDto;
+import com.ilyadudnikov.cloudfilestorage.dto.folder.UploadFolderDto;
 import com.ilyadudnikov.cloudfilestorage.security.CustomUserDetails;
 import com.ilyadudnikov.cloudfilestorage.services.FileService;
 import com.ilyadudnikov.cloudfilestorage.utils.BreadcrumbUtils;
@@ -49,6 +50,7 @@ public class MainController {
         model.addAttribute("breadcrumbs", breadcrumbs);
 
         model.addAttribute("uploadFileDto", new UploadFileDto());
+        model.addAttribute("uploadFolderDto", new UploadFolderDto());
 
         return "index";
     }
