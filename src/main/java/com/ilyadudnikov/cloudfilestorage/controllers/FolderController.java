@@ -50,20 +50,35 @@ public class FolderController {
     }
 
     @PostMapping
-    public String createFolder1(@ModelAttribute("folderDto") FolderDto folderDto,
-                                @AuthenticationPrincipal CustomUserDetails userDetails) {
-        return "index1";
+    public String createFolder(@ModelAttribute("folderDto") FolderDto folderDto,
+                               @AuthenticationPrincipal CustomUserDetails userDetails,
+                               RedirectAttributes redirectAttributes) {
+        try {
+            folderDto.setOwnerId(userDetails.getUser().getId());
+            folderService.createFolder(folderDto);
+            redirectAttributes.addFlashAttribute("success", "Folder created successfully!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "An error occurred while creating the folder");
+        }
+
+        redirectAttributes.addFlashAttribute("path", folderDto.getPath());
+        return "redirect:/";
     }
 
     @DeleteMapping
     public String deleteFolder(@ModelAttribute("folderDto") FolderDto folderDto,
                                @AuthenticationPrincipal CustomUserDetails userDetails,
                                RedirectAttributes redirectAttributes) {
-        folderDto.setOwnerId(userDetails.getUser().getId());
-        folderService.deleteFolder(folderDto);
+        try {
+            folderDto.setOwnerId(userDetails.getUser().getId());
+            folderService.deleteFolder(folderDto);
+
+            redirectAttributes.addFlashAttribute("success", "Folder deleted successfully!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "An error occurred while deleting a folder");
+        }
 
         redirectAttributes.addAttribute("path", folderDto.getPath());
-        redirectAttributes.addFlashAttribute("success", "Folder deleted successfully!");
         return "redirect:/";
     }
 
@@ -71,10 +86,15 @@ public class FolderController {
     public String renameFolder(@ModelAttribute("renameFolderDto") RenameFolderDto renameFolderDto,
                                @AuthenticationPrincipal CustomUserDetails userDetails,
                                RedirectAttributes redirectAttributes) {
-        renameFolderDto.setOwnerId(userDetails.getUser().getId());
-        folderService.renameFolder(renameFolderDto);
+        try {
+            renameFolderDto.setOwnerId(userDetails.getUser().getId());
+            folderService.renameFolder(renameFolderDto);
+            redirectAttributes.addFlashAttribute("success", "Folder renamed successfully!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "An error occurred while renaming the folder");
+        }
+
         redirectAttributes.addAttribute("path", renameFolderDto.getPath());
-        redirectAttributes.addFlashAttribute("success", "Folder renamed successfully!");
         return "redirect:/";
     }
 
@@ -91,13 +111,13 @@ public class FolderController {
 
 
 
-    @PostMapping("/create")
-    public String createFolder() {
-        FolderDto newFolderDto = new FolderDto();
-        newFolderDto.setFolderName("folder-new");
-        newFolderDto.setPath("folder-1/2/");
-        newFolderDto.setOwnerId(3L);
-        folderService.createFolder(newFolderDto);
-        return "index1";
-    }
+//    @PostMapping("/create")
+//    public String createFolder() {
+//        FolderDto newFolderDto = new FolderDto();
+//        newFolderDto.setFolderName("folder-new");
+//        newFolderDto.setPath("folder-1/2/");
+//        newFolderDto.setOwnerId(3L);
+//        folderService.createFolder(newFolderDto);
+//        return "index1";
+//    }
 }

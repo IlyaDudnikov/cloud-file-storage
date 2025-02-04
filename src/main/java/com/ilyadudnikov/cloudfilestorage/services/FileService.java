@@ -50,6 +50,8 @@ public class FileService {
             try {
                 Item item = result.get();
                 String fullObjectName = item.objectName();
+                String ownerPrefix = "user-" + ownerId + "-files/";
+                if (fullObjectName.replaceFirst(ownerPrefix, "").equals(path)) return;
                 String fileName = getObjectNameFromFullName(fullObjectName);
 
                 minioObjects.add(
