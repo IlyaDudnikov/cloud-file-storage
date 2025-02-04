@@ -10,6 +10,7 @@ import com.ilyadudnikov.cloudfilestorage.dto.folder.RenameFolderDto;
 import com.ilyadudnikov.cloudfilestorage.dto.folder.UploadFolderDto;
 import com.ilyadudnikov.cloudfilestorage.security.CustomUserDetails;
 import com.ilyadudnikov.cloudfilestorage.services.FileService;
+import com.ilyadudnikov.cloudfilestorage.services.SearchService;
 import com.ilyadudnikov.cloudfilestorage.utils.BreadcrumbUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -26,7 +27,8 @@ public class MainController {
 
     private final FileService fileService;
     private final BreadcrumbUtils breadcrumbUtils;
-    
+    private final SearchService searchService;
+
     @GetMapping("/")
     public String index(@AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestParam(value = "path", defaultValue = "", required = false) String path,
@@ -55,5 +57,20 @@ public class MainController {
         return "index";
     }
 
+
+    @GetMapping("/search")
+    public String search(@RequestParam("query") String query,
+                         @AuthenticationPrincipal CustomUserDetails userDetails,
+                         Model model) {
+        List<MinioObjectDto> foundObjects = searchService.search(query, userDetails.getUser().getId());
+        boolean hasFile = foundObjects.stream().anyMatch(file -> !file.getIsDir());
+        boolean hasFolder = foundObjects.stream().anyMatch(MinioObjectDto::getIsDir);
+
+        model.addAttribute("files", foundObjects);
+        model.addAttribute("hasFile", hasFile);
+        model.addAttribute("hasFolder", hasFolder);
+
+        return "search";
+    }
 
 }
