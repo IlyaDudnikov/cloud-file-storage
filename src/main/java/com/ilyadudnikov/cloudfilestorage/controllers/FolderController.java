@@ -30,13 +30,11 @@ public class FolderController {
     }
 
     @GetMapping(value = "/download", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-    public void downloadFolder(HttpServletResponse response) {
+    public void downloadFolder(@ModelAttribute("folderDto") FolderDto folderDto,
+                               @AuthenticationPrincipal CustomUserDetails userDetails,
+                               HttpServletResponse response) {
         try {
-
-            FolderDto folderDto = new FolderDto();
-            folderDto.setFolderName("folder-new");
-            folderDto.setPath("folder-1/");
-            folderDto.setOwnerId(3L);
+            folderDto.setOwnerId(userDetails.getUser().getId());
 
             // Устанавливаем заголовки для ответа
             response.setContentType("application/zip");
