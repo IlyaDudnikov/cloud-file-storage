@@ -4,6 +4,7 @@ import com.ilyadudnikov.cloudfilestorage.dto.BreadcrumbItem;
 import com.ilyadudnikov.cloudfilestorage.dto.MinioObjectDto;
 import com.ilyadudnikov.cloudfilestorage.dto.file.FileDto;
 import com.ilyadudnikov.cloudfilestorage.dto.file.RenameFileDto;
+import com.ilyadudnikov.cloudfilestorage.dto.file.UploadFileDto;
 import com.ilyadudnikov.cloudfilestorage.dto.folder.FolderDto;
 import com.ilyadudnikov.cloudfilestorage.dto.folder.RenameFolderDto;
 import com.ilyadudnikov.cloudfilestorage.security.CustomUserDetails;
@@ -31,8 +32,12 @@ public class MainController {
                         Model model) {
         if (userDetails != null) {
             List<MinioObjectDto> files = fileService.getUserFilesInFolder(userDetails.getUser().getId(), path);
-            model.addAttribute("files", files);
+            boolean hasFile = files.stream().anyMatch(file -> !file.getIsDir());
+            boolean hasFolder = files.stream().anyMatch(MinioObjectDto::getIsDir);
 
+            model.addAttribute("files", files);
+            model.addAttribute("hasFile", hasFile);
+            model.addAttribute("hasFolder", hasFolder);
         }
         model.addAttribute("folderDto", new FolderDto());
         model.addAttribute("renameFolderDto", new RenameFolderDto());
@@ -42,6 +47,8 @@ public class MainController {
 
         List<BreadcrumbItem> breadcrumbs = breadcrumbUtils.getBreadcrumbs(path);
         model.addAttribute("breadcrumbs", breadcrumbs);
+
+        model.addAttribute("uploadFileDto", new UploadFileDto());
 
         return "index";
     }

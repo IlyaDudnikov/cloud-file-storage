@@ -2,6 +2,7 @@ package com.ilyadudnikov.cloudfilestorage.controllers;
 
 import com.ilyadudnikov.cloudfilestorage.dto.file.FileDto;
 import com.ilyadudnikov.cloudfilestorage.dto.file.RenameFileDto;
+import com.ilyadudnikov.cloudfilestorage.dto.file.UploadFileDto;
 import com.ilyadudnikov.cloudfilestorage.security.CustomUserDetails;
 import com.ilyadudnikov.cloudfilestorage.services.FileService;
 import lombok.RequiredArgsConstructor;
@@ -21,14 +22,22 @@ public class FileController {
 
     private final FileService fileService;
 
-//    @PostMapping("/upload")
-//    public String uploadFile(@ModelAttribute("uploadFile") @Valid UploadFileDto uploadFile,
-//     @AuthenticationPrincipal CustomUserDetails user) {
-//        uploadFile.setOwnerId(user.getUser().getId());
-//        fileService.uploadFile(uploadFile);
-//        return "redirect:/hello";
-//    }
-//
+    @PostMapping("/upload")
+    public String uploadFile(@ModelAttribute("uploadFile") UploadFileDto uploadFile,
+                             @AuthenticationPrincipal CustomUserDetails userDetails,
+                             RedirectAttributes redirectAttributes) {
+        try {
+            uploadFile.setOwnerId(userDetails.getUser().getId());
+            fileService.uploadFile(uploadFile);
+            redirectAttributes.addFlashAttribute("success", "File uploaded successfully");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "File upload failed");
+        }
+
+        redirectAttributes.addAttribute("path", uploadFile.getPath());
+        return "redirect:/";
+    }
+
     @GetMapping(value = "/download", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     public ResponseEntity<ByteArrayResource> downloadFile(@ModelAttribute("fileDto") FileDto fileDto,
                                                           @AuthenticationPrincipal CustomUserDetails userDetails) {
