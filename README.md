@@ -1,7 +1,7 @@
 ## Deployment
 The project has been deployed and is available at the following address:
 
-[**Go to the project**](http://94.159.110.20:8080/weather-viewer/)
+[**Go to the project**](http://78.153.149.224:8080/)
 
 
 ## The CloudFileService project
