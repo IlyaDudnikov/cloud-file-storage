@@ -52,6 +52,7 @@ dependencies {
     annotationProcessor("org.mapstruct:mapstruct-processor:1.6.2")
 
     implementation("io.minio:minio:8.5.16")
+    testImplementation("org.testcontainers:minio:1.20.4")
 }
 
 tasks.withType<Test> {
