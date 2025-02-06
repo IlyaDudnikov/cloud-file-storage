@@ -25,6 +25,17 @@ services:
     volumes:
       - minio_cloud_file_storage_data:/data
 
+  redis:
+    image: redis:latest
+    restart: always
+    ports:
+      - '6379:6379'
+    command: redis-server --save 5 1
+    volumes:
+      - redis_data:/data
+
+
 volumes:
   mysql_cloud_file_storage_db_data:
   minio_cloud_file_storage_data:
+  redis_data:
